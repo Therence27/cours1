@@ -1,0 +1,102 @@
+import random
+
+SIZE = 10
+
+# Fonction pour afficher le labyrinthe
+def afficher_labyrinthe(labyrinthe, joueur):
+    for i in range(len(labyrinthe)):
+        for j in range(len(labyrinthe[i])):
+            if i == joueur[0] and j == joueur[1]:
+                print("P", end=" ")  # Position du joueur
+            else:
+                print(labyrinthe[i][j], end=" ")
+        print()
+
+# Fonction pour générer aléatoirement le labyrinthe
+def generer_labyrinthe():
+    labyrinthe = [["#" for _ in range(SIZE)] for _ in range(SIZE)]
+
+    # Générer des chemins
+    random.seed()
+    x = random.randint(0, SIZE - 1)
+    y = random.randint(0, SIZE - 1)
+    labyrinthe[y][x] = " "
+
+    for _ in range(SIZE * SIZE):
+        direction = random.randint(0, 3)
+
+        if direction == 0:  # Haut
+            if y > 1 and labyrinthe[y - 2][x] == "#":
+                labyrinthe[y - 1][x] = " "
+                labyrinthe[y - 2][x] = " "
+                y -= 2
+
+        elif direction == 1:  # Droite
+            if x < SIZE - 2 and labyrinthe[y][x + 2] == "#":
+                labyrinthe[y][x + 1] = " "
+                labyrinthe[y][x + 2] = " "
+                x += 2
+
+        elif direction == 2:  # Bas
+            if y < SIZE - 2 and labyrinthe[y + 2][x] == "#":
+                labyrinthe[y + 1][x] = " "
+                labyrinthe[y + 2][x] = " "
+                y += 2
+
+        elif direction == 3:  # Gauche
+            if x > 1 and labyrinthe[y][x - 2] == "#":
+                labyrinthe[y][x - 1] = " "
+                labyrinthe[y][x - 2] = " "
+                x -= 2
+
+    return labyrinthe
+
+labyrinthe = generer_labyrinthe()
+joueur = [1, 1]  # Position du joueur
+
+tresors = 0
+
+# Placer les trésors
+while tresors < 3:
+    x = random.randint(0, SIZE - 1)
+    y = random.randint(0, SIZE - 1)
+
+    if labyrinthe[y][x] == " ":
+        labyrinthe[y][x] = "$"
+        tresors += 1
+
+direction = ""
+
+while tresors > 0:
+    afficher_labyrinthe(labyrinthe, joueur)
+    direction = input("Entrez une direction (haut : h, bas : b, gauche : g, droite : d) : ")
+
+    nouvelle_x = joueur[1]
+    nouvelle_y = joueur[0]
+
+    if direction == "h":  # Haut
+        nouvelle_y -= 1
+
+    elif direction == "b":  # Bas
+        nouvelle_y += 1
+
+    elif direction == "g":  # Gauche
+        nouvelle_x -= 1
+
+    elif direction == "d":  # Droite
+        nouvelle_x += 1
+
+    if labyrinthe[nouvelle_y][nouvelle_x] != "#":
+        joueur[0] = nouvelle_y
+        joueur[1] = nouvelle_x
+
+        if labyrinthe[nouvelle_y][nouvelle_x] == "$":
+            print("Vous avez trouvé un trésor !")
+            tresors -= 1
+            labyrinthe[nouvelle_y][nouvelle_x] = " "
+    else:
+        print("Déplacement impossible !")
+
+    print()
+
+print("Bravo, vous avez trouvé tous les trésors !")
