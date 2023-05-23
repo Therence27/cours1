@@ -1,0 +1,154 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define SIZE 10
+
+// Structure pour représenter la position du joueur
+typedef struct {
+    int x;
+    int y;
+} Position;
+
+// Fonction pour afficher le labyrinthe
+void afficherLabyrinthe(char labyrinthe[SIZE][SIZE], Position joueur) {
+    int i, j;
+    
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (i == joueur.y && j == joueur.x) {
+                printf("P ");  // Position du joueur
+            } else {
+                printf("%c ", labyrinthe[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Fonction pour générer aléatoirement le labyrinthe
+void genererLabyrinthe(char labyrinthe[SIZE][SIZE]) {
+    int i, j;
+    
+    // Initialiser le labyrinthe avec des murs
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            labyrinthe[i][j] = '#';
+        }
+    }
+    
+    // Générer des chemins
+    srand(time(NULL));
+    int x = rand() % SIZE;
+    int y = rand() % SIZE;
+    labyrinthe[y][x] = ' ';
+    
+    for (i = 0; i < SIZE * SIZE; i++) {
+        int direction = rand() % 4;
+        
+        switch (direction) {
+            case 0:  // Haut
+                if (y > 1 && labyrinthe[y - 2][x] == '#') {
+                    labyrinthe[y - 1][x] = ' ';
+                    labyrinthe[y - 2][x] = ' ';
+                    y -= 2;
+                }
+                break;
+                
+            case 1:  // Droite
+                if (x < SIZE - 2 && labyrinthe[y][x + 2] == '#') {
+                    labyrinthe[y][x + 1] = ' ';
+                    labyrinthe[y][x + 2] = ' ';
+                    x += 2;
+                }
+                break;
+                
+            case 2:  // Bas
+                if (y < SIZE - 2 && labyrinthe[y + 2][x] == '#') {
+                    labyrinthe[y + 1][x] = ' ';
+                    labyrinthe[y + 2][x] = ' ';
+                    y += 2;
+                }
+                break;
+                
+            case 3:  // Gauche
+                if (x > 1 && labyrinthe[y][x - 2] == '#') {
+                    labyrinthe[y][x - 1] = ' ';
+                    labyrinthe[y][x - 2] = ' ';
+                    x -= 2;
+                }
+                break;
+        }
+    }
+}
+
+int main() {
+    char labyrinthe[SIZE][SIZE];
+    Position joueur;
+    joueur.x = 1;
+    joueur.y = 1;
+    
+    genererLabyrinthe(labyrinthe);
+    
+    int tresors = 0;
+    
+    // Placer les trésors
+    while (tresors < 3) {
+        int x = rand() % SIZE;
+        int y = rand() % SIZE;
+        
+        if (labyrinthe[y][x] == ' ') {
+            labyrinthe[y][x] = '$';
+            tresors++;
+        }
+    }
+    
+    char direction;
+    
+    do {
+        afficherLabyrinthe(labyrinthe, joueur);
+        printf("Entrez une direction (haut : h, bas : b, gauche : g, droite : d) : ");
+        scanf(" %c", &direction);
+        
+        int nouvelleX = joueur.x;
+        int nouvelleY = joueur.y;
+        
+        switch (direction) {
+            case 'h':  // Haut
+                nouvelleY--;
+                break;
+                
+            case 'b':  // Bas
+                nouvelleY++;
+                break;
+                
+            case 'g':  // Gauche
+                nouvelleX--;
+                break;
+                
+            case 'd':  // Droite
+                nouvelleX++;
+                break;
+        }
+        
+        if (labyrinthe[nouvelleY][nouvelleX] != '#') {
+            joueur.x = nouvelleX;
+            joueur.y = nouvelleY;
+            
+            if (labyrinthe[nouvelleY][nouvelleX] == '$') {
+                printf("Vous avez trouvé un trésor !\n");
+                tresors--;
+                labyrinthe[nouvelleY][nouvelleX] = ' ';
+            }
+        } else {
+            printf("Déplacement impossible !\n");
+        }
+        
+        printf("\n");
+        
+    } while (tresors > 0);
+    
+    printf("Bravo, vous avez trouvé tous les trésors !\n");
+    
+    return 0;
+}
